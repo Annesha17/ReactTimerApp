@@ -26,7 +26,6 @@ class TimersDashboard extends React.Component {
     this.createTimer(timer);
   };
 
-  // Inside TimersDashboard
   handleEditFormSubmit = (attrs) => {
     this.updateTimer(attrs);
   };
@@ -57,7 +56,6 @@ class TimersDashboard extends React.Component {
     });
   };
 
-  // Inside TimersDashboard
   deleteTimer = (timerId) => {
     this.setState({
       timers: this.state.timers.filter(t => t.id !== timerId),
@@ -68,7 +66,6 @@ class TimersDashboard extends React.Component {
     return (
       <div className='ui three column centered grid'>
         <div className='column'>
-          {/* Inside TimersDashboard.render() */}
           <EditableTimerList
             timers={this.state.timers}
             onFormSubmit={this.handleEditFormSubmit}
@@ -126,7 +123,6 @@ class ToggleableTimerForm extends React.Component {
 
 class EditableTimerList extends React.Component {
   render() {
-    // Inside EditableTimerList.render()
     const timers = this.props.timers.map((timer) => (
       <EditableTimer
         key={timer.id}
@@ -184,7 +180,6 @@ class EditableTimer extends React.Component {
           onFormClose={this.handleFormClose}
         />
       );
-    // Inside EditableTimer
     } else {
       return (
         <Timer
@@ -202,13 +197,22 @@ class EditableTimer extends React.Component {
 }
 
 class Timer extends React.Component {
+  componentDidMount() {
+    this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.forceUpdateInterval);
+  }
+
   handleTrashClick = () => {
     this.props.onTrashClick(this.props.id);
   };
 
   render() {
-    // ...
-    const elapsedString = helpers.renderElapsedString(this.props.elapsed);
+    const elapsedString = helpers.renderElapsedString(
+      this.props.elapsed, this.props.runningSince
+    );
     return (
       <div className='ui centered card'>
         <div className='content'>
@@ -223,7 +227,6 @@ class Timer extends React.Component {
               {elapsedString}
             </h2>
           </div>
-          {/* Inside Timer.render() */}
           <div className='extra content'>
             <span
               className='right floated edit icon'
