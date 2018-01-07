@@ -2,24 +2,24 @@
   eslint-disable react/prefer-stateless-function, react/jsx-boolean-value,
   no-undef, jsx-a11y/label-has-for, react/jsx-first-prop-new-line
 */
+/* Component TimersDashboard -
+Parent Component for 
+EditableTimerList and Toggaleable Timer Form*/
 class TimersDashboard extends React.Component {
   state = {
-    timers: [
-      {
-        title: 'Practice squat',
-        project: 'Gym Chores',
-        id: uuid.v4(),
-        elapsed: 5456099,
-        runningSince: Date.now(),
-      },
-      {
-        title: 'Bake squash',
-        project: 'Kitchen Chores',
-        id: uuid.v4(),
-        elapsed: 1273998,
-        runningSince: null,
-      },
-    ],
+    timers: []
+  };
+
+  componentDidMount() {
+    this.loadTimersFromServer();
+    setInterval(this.loadTimersFromServer, 5000);
+  }
+
+  loadTimersFromServer = () => {
+    client.getTimers((serverTimers) => (
+        this.setState({ timers: serverTimers })
+      )
+    );
   };
 
   handleCreateFormSubmit = (timer) => {
@@ -47,6 +47,7 @@ class TimersDashboard extends React.Component {
     this.setState({
       timers: this.state.timers.concat(t),
     });
+    client.createTimer(t);
   };
 
   updateTimer = (attrs) => {
@@ -62,12 +63,16 @@ class TimersDashboard extends React.Component {
         }
       }),
     });
+    client.updateTimer(attrs);
   };
 
   deleteTimer = (timerId) => {
     this.setState({
       timers: this.state.timers.filter(t => t.id !== timerId),
     });
+    client.deleteTimer(
+      { id: timerId }
+    );
   };
 
   startTimer = (timerId) => {
@@ -84,6 +89,9 @@ class TimersDashboard extends React.Component {
         }
       }),
     });
+    client.startTimer(
+      { id: timerId, start: now }
+    );
   };
 
   stopTimer = (timerId) => {
@@ -102,6 +110,9 @@ class TimersDashboard extends React.Component {
         }
       }),
     });
+    client.stopTimer(
+      { id: timerId, stop: now }
+    );
   };
 
   render() {
@@ -124,6 +135,10 @@ class TimersDashboard extends React.Component {
   }
 }
 
+
+/* Component ToggleableTimerForm-
+Parent Component for
+TimerForm */
 class ToggleableTimerForm extends React.Component {
   state = {
     isOpen: false,
@@ -164,7 +179,9 @@ class ToggleableTimerForm extends React.Component {
     }
   }
 }
-
+/* Component EditableTimerList
+Parent Component for
+Editable Timer */
 class EditableTimerList extends React.Component {
   render() {
     const timers = this.props.timers.map((timer) => (
@@ -189,6 +206,10 @@ class EditableTimerList extends React.Component {
   }
 }
 
+
+/* Component EditableTimer
+Parent Component for 
+TimerForm and Timer */
 class EditableTimer extends React.Component {
   state = {
     editFormOpen: false,
@@ -245,6 +266,10 @@ class EditableTimer extends React.Component {
   }
 }
 
+
+/*Component Timer
+for displaying timer for a particular project/title
+Used by EditableTimer component*/
 class Timer extends React.Component {
   componentDidMount() {
     this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50);
@@ -308,6 +333,9 @@ class Timer extends React.Component {
   }
 }
 
+
+/*Component TimerActionButton
+to give controls to start/stop timer */
 class TimerActionButton extends React.Component{
   render(){
     if(this.props.timerIsRunning){
@@ -322,7 +350,9 @@ class TimerActionButton extends React.Component{
    }
 }
 
-
+/*Component TimerForm
+To create/Update Timer in TimerList
+Used by EditableTimer and ToggleableTimerForm*/
 class TimerForm extends React.Component {
   state = {
     title: this.props.title || '',
